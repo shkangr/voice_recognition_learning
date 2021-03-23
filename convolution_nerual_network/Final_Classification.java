@@ -78,9 +78,6 @@ public class Final_Classification {
 
         int  seed = 1234; //test 1 = 123, 2 = 1234
 
-        //2차원 배열 .
-        // test 결과 seed 에 123 보다 1234 가 정확성이 더 좋았음. 대신 학습시키는 속도는 더 느렸지. 그래도 별차이 ㄴㄴ
-
         Random randNumGen = new Random(seed); // 일단 안씀
 
         LOGGER.info("data vertorization");
@@ -99,8 +96,6 @@ public class Final_Classification {
         InputSplit splitedtrainData = filesInDirSplit[0];
         InputSplit splitedtestData = filesInDirSplit[1];
 
-
-
         trainRR.initialize(splitedtrainData);
         DataSetIterator trainIter = new RecordReaderDataSetIterator(trainRR, batchSize, 1, outputNum);
 
@@ -109,10 +104,8 @@ public class Final_Classification {
         imageScaler.fit(trainIter);
 
         trainIter.setPreProcessor(imageScaler);
-
-
-
-
+        
+        
 
         //data for test
         File testData = new File(BASE_PATH + "/testing");
@@ -125,73 +118,10 @@ public class Final_Classification {
         imageScaler.fit(testIter);
         testIter.setPreProcessor(imageScaler);
 
-
-
-
         LOGGER.info("Network configuration and training...");
- /*
-        Map<Integer, Double> learningRateSchedule = new HashMap<>();
-        learningRateSchedule.put(0, 0.01); // 여기.
-        //learningRateSchedule.put(10, 0.00005);
-        learningRateSchedule.put(200, 0.05);
-        learningRateSchedule.put(600, 0.028);
-        learningRateSchedule.put(800, 0.0060);
-        learningRateSchedule.put(1000, 0.001);
-
-
-        MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
-            .seed(seed)
-            .l2(0.0005) // ridge regression value
-            .updater(new Nesterovs(new MapSchedule(ScheduleType.ITERATION, learningRateSchedule),0.9))
-            .weightInit(WeightInit.XAVIER)
-            .list()
-            .layer(new ConvolutionLayer.Builder(5, 7)
-                .nIn(channels)
-                .stride(2, 2)
-                .nOut(100)
-                .padding(0,0)
-                .activation(Activation.IDENTITY)
-                .build())
-            .layer(new SubsamplingLayer.Builder(SubsamplingLayer.PoolingType.MAX)
-                .kernelSize(2, 2)
-                .stride(2, 2)
-                .build())
-            .layer(new ConvolutionLayer.Builder(4, 6)
-                .stride(1, 1) // nIn need not specified in later layers
-                .nOut(200)
-                .padding(0,0)
-                .activation(Activation.IDENTITY)
-                .build())
-            .layer(new SubsamplingLayer.Builder(SubsamplingLayer.PoolingType.MAX)
-                .kernelSize(1, 3)
-                .stride(1, 1)
-                .build())
-            .layer(new ConvolutionLayer.Builder(2, 4)  //밑에 두 층 요기
-                .stride(1, 1) // nIn need not specified in later layers
-                .nOut(300)
-                .activation(Activation.IDENTITY)
-                .build())
-            .layer(new SubsamplingLayer.Builder(SubsamplingLayer.PoolingType.MAX)
-                .kernelSize(1, 1)
-                .stride(1, 1)           //여기도.
-                .build())
-
-            .layer(new DenseLayer.Builder().activation(Activation.RELU)
-                .nOut(500)
-                .build())
-            .layer(new OutputLayer.Builder(LossFunctions.LossFunction.NEGATIVELOGLIKELIHOOD)
-                .nOut(outputNum)
-                .activation(Activation.SOFTMAX)
-                .build())
-            .setInputType(InputType.convolutionalFlat(height, width, channels)) // InputType.convolutional for normal image
-            .build();
-
-*/
-
 
         double nonZeroBias = 1;
         double dropOut = 0.5;
-
 
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
             .seed(seed)
@@ -261,14 +191,14 @@ public class Final_Classification {
         for(int i =0; i< 200; i++){
             net.fit(trainIter);
             Evaluation eval = net.evaluate(testIter);
-            LOGGER.info("반복 회수 :" + i);
+            LOGGER.info("repeat num :" + i);
             LOGGER.info(eval.stats());
 
             trainIter.reset();
             testIter.reset();
         }
 
-        File voiceRecogPath = new File(BASE_PATH + "/model-voiceRecognition(naan-300).zip");
+        File voiceRecogPath = new File(BASE_PATH + "/<learning_model_file>.zip");
 
         ModelSerializer.writeModel(net, voiceRecogPath, true);
         LOGGER.info("Model saved in -> " + voiceRecogPath.getPath() );
